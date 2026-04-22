@@ -1,14 +1,13 @@
 # Starbreaker Protocol
 
-Starbreaker Protocol is a stylish arcade shooter built as a zero-dependency web game. It is designed to be dropped into a GitHub repository and published as a static site.
+Starbreaker Protocol is a stylish arcade shooter built as a zero-dependency web game. It is designed to be dropped into a GitHub repository and published as a static site, with a black-sky neon shell inspired by the look and feel of Kinetic Audio Box.
 
 ## What is included
 
-- A responsive landing page and HUD
+- A fullscreen-first glass HUD inspired by Kinetic Audio Box
 - A canvas-based shooter with 6 waves, 2 bosses, and upgrade drafts
-- Keyboard and touch support
-- Installable PWA support for mobile home-screen launch
-- Fullscreen shortcut support on browsers that allow it
+- Keyboard, touch, and mouse click-hold support
+- Browser-based fullscreen support on browsers that allow it
 - Local high-score persistence with `localStorage`
 - No build tooling or package install required
 
@@ -26,29 +25,28 @@ Because this project is plain static web content, you can open `index.html` dire
 
 Once Pages finishes deploying, the game will be live as a shareable website.
 
-## Mobile fullscreen behavior
+## Browser fullscreen behavior
 
 - From a normal mobile browser link, the game will load responsively and play with touch controls.
-- On Android and other supported browsers, the `Install App` button can trigger an install prompt once the site is hosted over HTTPS.
-- On iPhone and iPad, use `Share` -> `Add to Home Screen` after opening the live GitHub Pages link.
-- After installing from the home screen, the game launches in standalone app-style mode with safe-area handling.
+- On desktop browsers and some Android browsers, the `Fullscreen` button can expand the game area inside the browser window.
+- Some mobile browsers, especially on iPhone and iPad, may still keep browser chrome visible even while playing.
 
 ## Controls
 
 - `WASD` or arrow keys: move
+- Mouse: move to aim, click and hold to steer-fire
 - `Shift`: dash
 - `Space`: trigger EMP when fully charged
 - `P` or `Esc`: pause
-- Touch devices: drag on the playfield to move, use the on-screen `Dash` and `EMP` buttons
+- Touch devices: drag on the playfield to steer-fire, use the on-screen `Dash` and `EMP` buttons
 
 ## Files
 
 - `index.html`: page shell and UI
 - `styles.css`: visual design and responsive layout
 - `game.js`: gameplay, rendering, audio, and progression
-- `manifest.webmanifest`: install metadata for PWA support
-- `sw.js`: offline cache and app shell service worker
-- `icons/`: app icons for install prompts and home-screen launch
+- `sw.js`: cleanup script that unregisters older cached PWA versions if someone visited an earlier build
+- `icons/`: browser tab and sharing artwork
 
 ## Customization ideas
 
