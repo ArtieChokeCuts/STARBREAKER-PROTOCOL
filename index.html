@@ -8,237 +8,182 @@
     name="description"
     content="Starbreaker Protocol is a cinematic arcade shooter built to launch straight from a GitHub repository."
   >
-  <meta name="theme-color" content="#07121c">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Starbreaker">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap"
-    rel="stylesheet"
-  >
-  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#000000">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="scene-grid" aria-hidden="true"></div>
-  <div class="page-shell">
-    <header class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">GitHub-ready blockbuster browser game</p>
-        <h1>STARBREAKER <span>PROTOCOL</span></h1>
-        <p class="tagline">
-          Rip through a siege armada, trigger impossible combo chains, and turn a full charge bar into an
-          EMP supernova.
-        </p>
+  <div class="scene-shell">
+    <div class="canvas-wrap">
+      <canvas id="game" width="1280" height="720" aria-label="Starbreaker Protocol game viewport"></canvas>
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+
+      <div class="top-panels">
+        <section class="glass-panel info-panel">
+          <p class="eyebrow">Kinetic combat visualizer</p>
+          <h1>STARBREAKER PROTOCOL</h1>
+          <p class="panel-copy">
+            Black-sky neon siege run inspired by your kinetic audio box. Drag with touch or move the mouse,
+            then click and hold to drive the ship and fire straight into the breach.
+          </p>
+          <div class="mini-stats">
+            <article class="mini-stat">
+              <span>Best Score</span>
+              <strong id="bestScoreTitle">0</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Best Echo</span>
+              <strong id="bestScoreSide">0</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="glass-panel stack-panel">
+          <p class="eyebrow">Upgrade stack</p>
+          <ul class="upgrade-list" id="activeUpgrades">
+            <li>No upgrades online yet</li>
+          </ul>
+        </section>
       </div>
-      <div class="hero-stats">
-        <article class="stat-card">
-          <p>Best Score</p>
-          <strong id="bestScoreTitle">0</strong>
+
+      <div class="boss-bar hidden" id="bossBarWrap">
+        <div class="boss-bar-label">
+          <span id="bossName">Boss</span>
+          <span id="bossHpText">100%</span>
+        </div>
+        <div class="boss-track"><div id="bossBar"></div></div>
+      </div>
+
+      <div class="overlay intro" id="introOverlay">
+        <div class="overlay-panel hint-card">
+          <p class="eyebrow">Tap to launch</p>
+          <h2>The sky reacts to your hands</h2>
+          <p>
+            Touch and drag to steer-fire on mobile, or move the mouse and click-hold to carve lines through
+            the field on desktop. Dash and EMP stay hot in the lower-right control cluster.
+          </p>
+          <div class="overlay-points">
+            <span>Touch + hold to shoot</span>
+            <span>Mouse + click to shoot</span>
+            <span>Fullscreen inside browser</span>
+          </div>
+          <div class="intro-actions">
+            <button type="button" class="btn launch-btn" id="startButton">Launch Run</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="upgradeOverlay">
+        <div class="overlay-panel upgrade-panel">
+          <p class="eyebrow">Upgrade Bay</p>
+          <h2>Pick your edge</h2>
+          <p id="upgradePrompt">Wave cleared. Reinforce the ship before the next breach opens.</p>
+          <div class="upgrade-grid" id="upgradeGrid"></div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="pausedOverlay">
+        <div class="overlay-panel small-panel">
+          <p class="eyebrow">Combat pause</p>
+          <h2>Systems holding</h2>
+          <p>The field is still listening. Jump back in when you are ready.</p>
+          <button type="button" class="btn launch-btn" id="resumeButton">Resume</button>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="gameOverOverlay">
+        <div class="overlay-panel">
+          <p class="eyebrow" id="gameOverEyebrow">Run complete</p>
+          <h2 id="gameOverTitle">Mission result</h2>
+          <p id="gameOverMessage">Your signal is still echoing through the upper atmosphere.</p>
+          <div class="result-grid">
+            <article>
+              <span>Final Score</span>
+              <strong id="finalScore">0</strong>
+            </article>
+            <article>
+              <span>Best Score</span>
+              <strong id="bestScore">0</strong>
+            </article>
+            <article>
+              <span>Waves Cleared</span>
+              <strong id="wavesCleared">0</strong>
+            </article>
+          </div>
+          <button type="button" class="btn launch-btn" id="replayButton">Fly Again</button>
+        </div>
+      </div>
+
+      <div class="toast hidden" id="toast"></div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="pill meter-pill">
+        <article class="meter-card">
+          <span>Hull</span>
+          <strong id="hullValue">100 / 100</strong>
+          <div class="meter"><div id="hullBar"></div></div>
         </article>
-        <article class="stat-card">
-          <p>Run Objective</p>
-          <strong>Destroy the Leviathan</strong>
+        <article class="meter-card">
+          <span>EMP Charge</span>
+          <strong id="chargeValue">0%</strong>
+          <div class="meter charge"><div id="chargeBar"></div></div>
         </article>
-        <article class="stat-card">
-          <p>Platform</p>
-          <strong>Static site / GitHub Pages</strong>
+        <article class="meter-card compact-meter">
+          <span>Combo</span>
+          <strong id="comboValue">x1.0</strong>
+          <div class="meter combo"><div id="comboBar"></div></div>
         </article>
       </div>
-    </header>
 
-    <main class="experience">
-      <section class="briefing panel">
-        <div class="panel-heading">
-          <p class="eyebrow">Mission Intel</p>
-          <h2>One more run will become ten</h2>
-        </div>
-        <p class="panel-copy">
-          Starbreaker Protocol is a score-chasing arena shooter with boss fights, upgrade drafts, synth SFX,
-          and a fully self-contained canvas build. Drop it into a GitHub repo and publish it.
-        </p>
-        <div class="intel-list">
-          <article>
-            <h3>Auto-fire arsenal</h3>
-            <p>Focus on movement while the interceptor locks onto the hottest threat in the sky.</p>
-          </article>
-          <article>
-            <h3>Wave draft system</h3>
-            <p>Every cleared wave hands you a fresh upgrade pick to shape a different run.</p>
-          </article>
-          <article>
-            <h3>Boss-stage spectacle</h3>
-            <p>Mid-run and finale bosses flood the screen with cinematic bullet patterns.</p>
-          </article>
-        </div>
+      <div class="pill telemetry-pill">
+        <article class="telemetry-chip">
+          <span>Wave</span>
+          <strong id="waveValue">Standby</strong>
+        </article>
+        <article class="telemetry-chip">
+          <span>Targets</span>
+          <strong id="enemiesValue">0</strong>
+        </article>
+        <article class="telemetry-chip emphasis">
+          <span>Score</span>
+          <strong id="scoreValue">0</strong>
+        </article>
+        <article class="telemetry-chip">
+          <span>Status</span>
+          <strong id="statusValue">Awaiting launch</strong>
+        </article>
+      </div>
 
-        <div class="control-grid">
-          <div class="control-item"><span>Move</span><strong>WASD / Arrows / Drag</strong></div>
-          <div class="control-item"><span>Dash</span><strong>Shift / Dash Button</strong></div>
-          <div class="control-item"><span>EMP Burst</span><strong>Space / EMP Button</strong></div>
-          <div class="control-item"><span>Pause</span><strong>P or Esc</strong></div>
-        </div>
-      </section>
+      <div class="pill settings-pill">
+        <label class="toggle-label">
+          <input type="checkbox" id="hapticsToggle">
+          <span>Haptics</span>
+        </label>
+        <label>
+          Intensity
+          <input type="range" id="hapticsIntensity" min="0" max="100" value="45">
+        </label>
+      </div>
 
-      <section class="stage-panel panel">
-        <div class="stage-chrome">
-          <div class="hud-row">
-            <div class="hud-stat wide">
-              <div class="hud-label">
-                <span>Hull</span>
-                <strong id="hullValue">100 / 100</strong>
-              </div>
-              <div class="meter"><div id="hullBar"></div></div>
-            </div>
-            <div class="hud-stat wide">
-              <div class="hud-label">
-                <span>EMP Charge</span>
-                <strong id="chargeValue">0%</strong>
-              </div>
-              <div class="meter charge"><div id="chargeBar"></div></div>
-            </div>
-            <div class="hud-stat">
-              <span>Combo</span>
-              <strong id="comboValue">x1.0</strong>
-              <div class="meter combo"><div id="comboBar"></div></div>
-            </div>
-          </div>
-          <div class="hud-row compact">
-            <div class="status-chip">
-              <span>Wave</span>
-              <strong id="waveValue">Standby</strong>
-            </div>
-            <div class="status-chip">
-              <span>Targets</span>
-              <strong id="enemiesValue">0</strong>
-            </div>
-            <div class="status-chip emphasis">
-              <span>Score</span>
-              <strong id="scoreValue">0</strong>
-            </div>
-            <div class="status-chip">
-              <span>Status</span>
-              <strong id="statusValue">Awaiting launch</strong>
-            </div>
-          </div>
-        </div>
+      <div class="pill settings-pill">
+        <label>
+          Trails
+          <input type="range" id="trail" min="0" max="100" value="78">
+        </label>
+        <label>
+          Drift
+          <input type="range" id="drift" min="0" max="100" value="35">
+        </label>
+      </div>
 
-        <div class="boss-bar hidden" id="bossBarWrap">
-          <div class="boss-bar-label">
-            <span id="bossName">Boss</span>
-            <span id="bossHpText">100%</span>
-          </div>
-          <div class="boss-track"><div id="bossBar"></div></div>
-        </div>
-
-        <div class="canvas-wrap">
-          <canvas id="game" width="1280" height="720" aria-label="Starbreaker Protocol game viewport"></canvas>
-          <div class="scanlines" aria-hidden="true"></div>
-          <div class="vignette" aria-hidden="true"></div>
-
-          <div class="overlay intro" id="introOverlay">
-            <div class="overlay-panel">
-              <p class="eyebrow">Interceptor command uplink</p>
-              <h2>The sky is already on fire</h2>
-              <p>
-                You are the final pilot cleared to break the siege. Keep the combo alive, dash through kill
-                windows, and cash in your EMP meter when the screen turns impossible.
-              </p>
-              <div class="overlay-points">
-                <span>6 waves</span>
-                <span>2 bosses</span>
-                <span>Draft upgrades every round</span>
-              </div>
-              <div class="intro-actions">
-                <button type="button" class="action-button" id="startButton">Launch Run</button>
-                <button type="button" class="action-button secondary-action hidden" id="installButton">Install App</button>
-                <button type="button" class="action-button secondary-action hidden" id="fullscreenButton">Fullscreen</button>
-              </div>
-              <p class="install-note hidden" id="installHint"></p>
-              <p class="helper-text">Desktop recommended, but touch drag and mobile action buttons are supported.</p>
-            </div>
-          </div>
-
-          <div class="overlay hidden" id="upgradeOverlay">
-            <div class="overlay-panel upgrade-panel">
-              <p class="eyebrow">Upgrade Bay</p>
-              <h2>Pick your edge</h2>
-              <p id="upgradePrompt">Wave cleared. Reinforce the ship before the next breach opens.</p>
-              <div class="upgrade-grid" id="upgradeGrid"></div>
-            </div>
-          </div>
-
-          <div class="overlay hidden" id="pausedOverlay">
-            <div class="overlay-panel small-panel">
-              <p class="eyebrow">Combat pause</p>
-              <h2>Systems holding</h2>
-              <p>The sky will wait. Jump back in when you're ready.</p>
-              <button type="button" class="action-button" id="resumeButton">Resume</button>
-            </div>
-          </div>
-
-          <div class="overlay hidden" id="gameOverOverlay">
-            <div class="overlay-panel">
-              <p class="eyebrow" id="gameOverEyebrow">Run complete</p>
-              <h2 id="gameOverTitle">Mission result</h2>
-              <p id="gameOverMessage">Your signal is still echoing through the upper atmosphere.</p>
-              <div class="result-grid">
-                <article>
-                  <span>Final Score</span>
-                  <strong id="finalScore">0</strong>
-                </article>
-                <article>
-                  <span>Best Score</span>
-                  <strong id="bestScore">0</strong>
-                </article>
-                <article>
-                  <span>Waves Cleared</span>
-                  <strong id="wavesCleared">0</strong>
-                </article>
-              </div>
-              <button type="button" class="action-button" id="replayButton">Fly Again</button>
-            </div>
-          </div>
-
-          <div class="toast hidden" id="toast"></div>
-
-          <div class="mobile-actions">
-            <button type="button" id="dashButton">Dash</button>
-            <button type="button" id="overdriveButton">EMP</button>
-          </div>
-        </div>
-      </section>
-
-      <aside class="broadcast panel">
-        <div class="panel-heading">
-          <p class="eyebrow">Broadcast Feed</p>
-          <h2>Live run telemetry</h2>
-        </div>
-        <div class="broadcast-stack">
-          <article class="broadcast-card">
-            <span>Best Score Echo</span>
-            <strong id="bestScoreSide">0</strong>
-          </article>
-          <article class="broadcast-card">
-            <span>Upgrade Stack</span>
-            <ul class="upgrade-list" id="activeUpgrades">
-              <li>No upgrades online yet</li>
-            </ul>
-          </article>
-          <article class="broadcast-card">
-            <span>Release Ready</span>
-            <p>
-              This build is plain HTML, CSS, and JavaScript. You can host it straight from a GitHub repo with
-              no build step.
-            </p>
-          </article>
-        </div>
-      </aside>
-    </main>
+      <div class="action-cluster">
+        <button type="button" class="btn" id="fullscreenButton">Fullscreen</button>
+        <button type="button" class="btn" id="dashButton">Dash</button>
+        <button type="button" class="btn" id="overdriveButton">EMP</button>
+      </div>
+    </div>
   </div>
 
   <script src="game.js"></script>
