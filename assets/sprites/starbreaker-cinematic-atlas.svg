@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 768" width="1024" height="768">
+  <defs>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.28 0 0 0 0 1 0 0 0 0 0.9 0 0 0 0.9 0" result="cyan"/>
+      <feMerge><feMergeNode in="cyan"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="teal" x1="0" x2="0" y1="-60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f5ffff"/><stop offset="0.35" stop-color="#48ffe8"/><stop offset="1" stop-color="#08778b"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0" x2="0" y1="-60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff6c7"/><stop offset="0.42" stop-color="#ffbf32"/><stop offset="1" stop-color="#8c3d16"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" x2="0" y1="-60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffd8c8"/><stop offset="0.42" stop-color="#ff4a3e"/><stop offset="1" stop-color="#5c1014"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" x2="0" y1="-60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ecffff"/><stop offset="0.4" stop-color="#3bb8ff"/><stop offset="1" stop-color="#093b88"/>
+    </linearGradient>
+    <style>
+      .ink{stroke:#061017;stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+      .lite{stroke:#eaffff;stroke-width:1.5;stroke-linecap:round;opacity:.72}
+      .core{fill:#eaffff;stroke:#061017;stroke-width:2.5}
+      .flare{filter:url(#glow);opacity:.9}
+    </style>
+    <g id="player">
+      <path class="ink" fill="url(#teal)" d="M0-55 16-12 47-3 32 22 13 16 7 45H-7l-6-29-19 6-15-25 31-9Z"/>
+      <path class="ink" fill="#0b313c" d="M0-42 10-5 0 18-10-5Z"/>
+      <ellipse class="core" cx="0" cy="-9" rx="9" ry="15"/>
+      <path class="flare" fill="#39fff0" d="M-22 24h12l-5 33ZM10 24h12l-7 33Z"/>
+      <path class="lite" fill="none" d="M0-46 0 34M-34-1-12 8M34-1 12 8"/>
+    </g>
+    <g id="drone">
+      <path class="ink" fill="url(#blue)" d="M0-42 31-8 15 34 0 24-15 34-31-8Z"/>
+      <circle class="core" cx="0" cy="-3" r="10"/>
+      <path class="flare" fill="#4fc3ff" d="M-10 30h20L0 50Z"/>
+      <path class="lite" fill="none" d="M0-32v48M-23-6h46"/>
+    </g>
+    <g id="striker">
+      <path class="ink" fill="url(#amber)" d="M0-48 18-10 49 5 15 14 0 49-15 14-49 5-18-10Z"/>
+      <circle class="core" cx="0" cy="3" r="9"/>
+      <path class="flare" fill="#ffcf6a" d="M-30 10-52 24-39 3ZM30 10 52 24 39 3Z"/>
+    </g>
+    <g id="bomber">
+      <path class="ink" fill="url(#red)" d="M0-45 38-22 53 15 25 40 0 29-25 40-53 15-38-22Z"/>
+      <circle class="core" cx="0" cy="-1" r="12"/>
+      <path class="lite" fill="none" d="M-43 13H43M-20-27 0 24 20-27"/>
+    </g>
+    <g id="leech">
+      <path class="ink" fill="#35f2a8" d="M0-46 18-22 45-17 25 6 34 36 5 24-18 43-17 12-45-3-17-15Z"/>
+      <circle class="core" cx="0" cy="-1" r="10"/>
+      <path class="flare" fill="#71ffce" d="M-42-2c15 24 69 24 84 0-10 38-74 38-84 0Z" opacity=".32"/>
+    </g>
+    <g id="warden">
+      <path class="ink" fill="#d8d1b6" d="M0-50 22-26 54-14 62 18 32 39 0 25-32 39-62 18-54-14-22-26Z"/>
+      <path class="ink" fill="url(#teal)" d="M0-35 17 0 0 39-17 0Z"/>
+      <circle class="core" cx="0" cy="-2" r="13"/>
+      <path class="flare" fill="#4ffff0" d="M-60 17-82 31-66 2ZM60 17 82 31 66 2Z"/>
+    </g>
+    <g id="leviathan">
+      <path class="ink" fill="url(#red)" d="M0-58 32-35 64-24 54 8 80 34 35 31 0 55-35 31-80 34-54 8-64-24-32-35Z"/>
+      <path class="ink" fill="#2a1218" d="M0-45 20-5 0 43-20-5Z"/>
+      <circle class="core" cx="0" cy="-3" r="14"/>
+      <path class="flare" fill="#ff4a3e" d="M-40 26-66 55-50 16ZM40 26 66 55 50 16Z"/>
+    </g>
+    <g id="wing">
+      <path class="ink" fill="#e9ddc3" d="M0-34 25-10 22 20 0 35-22 20-25-10Z"/>
+      <circle class="core" cx="0" cy="-2" r="11"/>
+      <path class="flare" fill="#4ffff0" d="M-8 25H8L0 48Z"/>
+    </g>
+    <g id="laser"><path class="flare" fill="#71ffce" d="M-8 42 0-48 8 42 0 58Z"/><path fill="#fff" d="M-3 36 0-31 3 36Z"/></g>
+    <g id="orb"><circle class="flare" fill="#ffcf6a" r="30"/><circle fill="#fff4bf" r="13"/></g>
+    <g id="emp"><circle class="flare" fill="none" stroke="#71ffce" stroke-width="9" r="34"/><circle fill="none" stroke="#eaffff" stroke-width="2" r="21"/></g>
+    <g id="hull"><path class="ink" fill="#55f09d" d="M0-42 37-18 37 22 0 45-37 22-37-18Z"/><path fill="#fff" d="M-8-24h16v16h16V8H8v16H-8V8h-16V-8h16Z"/></g>
+    <g id="energy"><path class="ink" fill="#38bfff" d="M0-42 37-18 37 22 0 45-37 22-37-18Z"/><path fill="#fff" d="M5-28-16 4H0l-7 30 24-39H1Z"/></g>
+    <g id="boom"><circle class="flare" fill="#ffcf6a" r="32"/><path fill="#ff6a32" d="M0-50 10-21 38-37 23-9 55 0 22 8 39 37 8 22 0 56-9 21-39 38-22 8-54 0-23-9-38-37-10-21Z"/><circle fill="#fff2c5" r="15"/></g>
+    <g id="smoke"><path fill="#5f574c" d="M-42 16c-5-25 23-28 29-13 8-25 45-12 34 10 28-2 28 38-2 37h-54c-28 0-33-25-7-34Z"/><circle fill="#2d2d2d" cx="12" cy="11" r="17" opacity=".7"/></g>
+  </defs>
+
+  <g transform="translate(64 64)"><use href="#player"/></g>
+  <g transform="translate(192 64) rotate(-18)"><use href="#player"/></g>
+  <g transform="translate(320 64) rotate(18)"><use href="#player"/></g>
+  <g transform="translate(448 64) scale(1.02)"><use href="#player"/><use href="#laser" transform="translate(0 33) scale(.45)"/></g>
+  <g transform="translate(576 64)"><use href="#player"/><use href="#boom" transform="translate(-34 8) scale(.35)"/><use href="#boom" transform="translate(34 8) scale(.35)"/></g>
+  <g transform="translate(704 64) scale(1.08)"><use href="#player"/><path class="flare" fill="#71ffce" d="M-16 28H16L0 72Z"/></g>
+  <g transform="translate(832 64)"><use href="#player"/><use href="#boom" transform="translate(0 2) scale(.52)"/></g>
+  <g transform="translate(960 64)"><use href="#player"/></g>
+
+  <g transform="translate(64 192)"><use href="#wing"/></g>
+  <g transform="translate(192 192) rotate(-14)"><use href="#wing"/></g>
+  <g transform="translate(320 192)"><use href="#wing"/><use href="#laser" transform="translate(-28 5) rotate(72) scale(.34)"/></g>
+  <g transform="translate(448 192)"><use href="#wing"/><use href="#boom" transform="translate(-24 0) scale(.28)"/></g>
+  <g transform="translate(576 192) scale(1.04)"><use href="#wing"/><path class="flare" fill="#71ffce" d="M-12 24H12L0 58Z"/></g>
+  <g transform="translate(704 192)"><use href="#wing"/><use href="#boom" transform="translate(24 0) scale(.32)"/></g>
+  <g transform="translate(832 192)"><use href="#wing"/><use href="#emp" transform="scale(.62)"/></g>
+  <g transform="translate(960 192)"><use href="#wing"/></g>
+
+  <g transform="translate(64 320)"><use href="#drone"/></g>
+  <g transform="translate(192 320) scale(1.08)"><use href="#drone"/></g>
+  <g transform="translate(320 320)"><use href="#striker"/></g>
+  <g transform="translate(448 320) scale(1.08)"><use href="#striker"/></g>
+  <g transform="translate(576 320)"><use href="#bomber"/></g>
+  <g transform="translate(704 320) scale(1.08)"><use href="#bomber"/></g>
+  <g transform="translate(832 320)"><use href="#leech"/></g>
+  <g transform="translate(960 320) scale(1.08)"><use href="#leech"/></g>
+
+  <g transform="translate(64 448) scale(.9)"><use href="#warden"/></g>
+  <g transform="translate(192 448) scale(.95)"><use href="#warden"/><use href="#emp" transform="scale(.5)"/></g>
+  <g transform="translate(320 448)"><use href="#warden"/><use href="#emp" transform="scale(.95)"/></g>
+  <g transform="translate(448 448)"><use href="#warden"/><use href="#orb" transform="translate(0 28) scale(.36)"/></g>
+  <g transform="translate(576 448)"><use href="#warden"/><use href="#laser" transform="translate(0 28) scale(.72)"/></g>
+  <g transform="translate(704 448)"><use href="#warden"/><use href="#boom" transform="scale(.4)"/></g>
+  <g transform="translate(832 448) scale(1.06)"><use href="#warden"/></g>
+  <g transform="translate(960 448)"><use href="#warden"/></g>
+
+  <g transform="translate(64 576) scale(.78)"><use href="#leviathan"/></g>
+  <g transform="translate(192 576) scale(.88)"><use href="#leviathan"/></g>
+  <g transform="translate(320 576)"><use href="#leviathan"/><use href="#orb" transform="scale(.5)"/></g>
+  <g transform="translate(448 576)"><use href="#leviathan"/><use href="#laser" transform="translate(0 32) scale(.75)"/></g>
+  <g transform="translate(576 576)"><use href="#leviathan"/><use href="#laser" transform="translate(0 38) scale(1.08)"/></g>
+  <g transform="translate(704 576)"><use href="#leviathan"/><use href="#boom" transform="scale(.45)"/></g>
+  <g transform="translate(832 576) scale(1.05)"><use href="#leviathan"/></g>
+  <g transform="translate(960 576)"><use href="#leviathan"/></g>
+
+  <g transform="translate(64 704) rotate(-34)"><use href="#laser"/></g>
+  <g transform="translate(192 704) rotate(-34)"><use href="#orb"/></g>
+  <g transform="translate(320 704)"><use href="#emp"/></g>
+  <g transform="translate(448 704)"><use href="#hull"/></g>
+  <g transform="translate(576 704)"><use href="#energy"/></g>
+  <g transform="translate(704 704)"><use href="#boom"/></g>
+  <g transform="translate(832 704) scale(1.08)"><use href="#boom"/><use href="#smoke" transform="translate(16 18) scale(.58)"/></g>
+  <g transform="translate(960 704)"><use href="#smoke"/></g>
+</svg>
