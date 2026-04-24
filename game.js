@@ -84,8 +84,11 @@
   camera.position.set(0, 0, 48);
 
   const textures = createTextures();
+  const spriteAnimations = {};
+  const additiveTextures = new Set(["bullet", "enemyShot", "particle", "reticle", "muzzle"]);
   const environment = createEnvironment();
   const cockpit = createCockpit();
+  loadCinematicAtlas();
 
   const ENEMIES = {
     drone: {
@@ -94,9 +97,9 @@
       tint: 0x77dfff,
       hp: 28,
       speed: 72,
-      radius: 5.4,
+      radius: 6.2,
       depth: 15,
-      scale: [10, 10],
+      scale: [15, 15],
       score: 70,
       drift: 5,
       wobble: 2.3,
@@ -110,9 +113,9 @@
       tint: 0xffd47a,
       hp: 46,
       speed: 86,
-      radius: 6.4,
+      radius: 7.4,
       depth: 16,
-      scale: [13, 9],
+      scale: [19, 13],
       score: 110,
       drift: 8,
       wobble: 2.8,
@@ -126,9 +129,9 @@
       tint: 0xff728d,
       hp: 105,
       speed: 46,
-      radius: 10,
+      radius: 11.5,
       depth: 20,
-      scale: [17, 13],
+      scale: [24, 18],
       score: 220,
       drift: 4,
       wobble: 1.1,
@@ -142,9 +145,9 @@
       tint: 0x86ffd7,
       hp: 62,
       speed: 62,
-      radius: 7,
+      radius: 8.2,
       depth: 16,
-      scale: [11, 11],
+      scale: [16, 16],
       score: 150,
       drift: 12,
       wobble: 3.4,
@@ -158,9 +161,9 @@
       tint: 0x7bbdff,
       hp: 920,
       speed: 82,
-      radius: 24,
+      radius: 30,
       depth: 34,
-      scale: [58, 30],
+      scale: [72, 38],
       score: 1800,
       drift: 18,
       wobble: 0.55,
@@ -176,9 +179,9 @@
       tint: 0xff9c72,
       hp: 1600,
       speed: 76,
-      radius: 30,
+      radius: 36,
       depth: 40,
-      scale: [76, 36],
+      scale: [92, 44],
       score: 3600,
       drift: 22,
       wobble: 0.45,
@@ -442,6 +445,62 @@
     }));
   }
 
+  function loadCinematicAtlas() {
+    const image = new Image();
+    image.onload = () => {
+      const frames = {
+        wingDrone: [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1]],
+        drone: [[0, 2], [1, 2]],
+        striker: [[2, 2], [3, 2]],
+        bomber: [[4, 2], [5, 2]],
+        leech: [[6, 2], [7, 2]],
+        warden: [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]],
+        leviathan: [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]],
+        bullet: [[0, 5]],
+        enemyShot: [[1, 5]]
+      };
+
+      Object.entries(frames).forEach(([name, cells]) => {
+        spriteAnimations[name] = cells.map(([col, row]) => createAtlasTexture(image, col, row));
+        textures[name] = spriteAnimations[name][0];
+      });
+
+      cockpit.droneLeft.material.map = textures.wingDrone;
+      cockpit.droneRight.material.map = textures.wingDrone;
+      cockpit.droneLeft.material.needsUpdate = true;
+      cockpit.droneRight.material.needsUpdate = true;
+    };
+    image.src = "assets/sprites/starbreaker-cinematic-atlas.svg";
+  }
+
+  function createAtlasTexture(image, col, row) {
+    const frame = 128;
+    const textureCanvas = document.createElement("canvas");
+    textureCanvas.width = frame;
+    textureCanvas.height = frame;
+    const ctx = textureCanvas.getContext("2d");
+    ctx.clearRect(0, 0, frame, frame);
+    ctx.drawImage(image, col * frame, row * frame, frame, frame, 0, 0, frame, frame);
+    const texture = new THREE.CanvasTexture(textureCanvas);
+    texture.needsUpdate = true;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    if ("colorSpace" in texture && THREE.SRGBColorSpace) {
+      texture.colorSpace = THREE.SRGBColorSpace;
+    }
+    return texture;
+  }
+
+  function applyTextureSequence(sprite, name, age, fps = 6) {
+    const sequence = spriteAnimations[name];
+    if (!sequence?.length) return;
+    const texture = sequence[Math.floor(age * fps) % sequence.length];
+    if (sprite.material.map !== texture) {
+      sprite.material.map = texture;
+      sprite.material.needsUpdate = true;
+    }
+  }
+
   function shipSprite(ctx, size, color, points, withCore) {
     ctx.save();
     ctx.shadowColor = color;
@@ -564,7 +623,7 @@
       color: options.color || 0xffffff,
       transparent: true,
       opacity: options.opacity ?? 1,
-      blending: options.blending || THREE.AdditiveBlending,
+      blending: options.blending || (additiveTextures.has(textureName) ? THREE.AdditiveBlending : THREE.NormalBlending),
       depthTest: options.depthTest ?? true,
       depthWrite: false
     });
@@ -680,61 +739,54 @@
 
   function updateIdleCockpit(dt) {
     state.time += dt;
-    state.targetAim.x = Math.sin(state.time * 0.42) * aimRangeX() * 0.18;
-    state.targetAim.y = Math.cos(state.time * 0.35) * aimRangeY() * 0.14;
+    state.targetAim.x = Math.sin(state.time * 0.75) * 11;
+    state.targetAim.y = Math.cos(state.time * 1.05) * 5.2;
     updateAim(dt);
     updateCockpitSprites(dt);
-    updateParticles(dt);
   }
 
   function updateGame(dt) {
     state.time += dt;
     state.fireTimer -= dt;
     state.spawnTimer -= dt;
-    state.dashCooldown = Math.max(0, state.dashCooldown - dt);
+    state.comboTimer -= dt;
+    state.dashCooldown -= dt;
     state.dashTime = Math.max(0, state.dashTime - dt);
     state.invulnerable = Math.max(0, state.invulnerable - dt);
-    state.shake = Math.max(0, state.shake - dt * 1.8);
+    state.shake = Math.max(0, state.shake - dt * 2.5);
 
-    updateKeyboardAim(dt);
+    handleKeyboardAim(dt);
     updateAim(dt);
-
-    if (state.comboTimer > 0) {
-      state.comboTimer -= dt;
-      if (state.comboTimer <= 0) state.combo = Math.max(1, state.combo - 0.35);
-    }
-
-    if ((state.pointerDown || state.keys.has("KeyJ") || state.keys.has("Enter")) && state.fireTimer <= 0) {
-      firePlayerWeapons();
-    }
-
     updateSpawning();
     updateEnemies(dt);
     updateBullets(dt);
     updateEnemyShots(dt);
     updateParticles(dt);
     updateCockpitSprites(dt);
+
+    if ((state.pointerDown || state.keys.has("KeyJ") || state.keys.has("Enter")) && state.fireTimer <= 0) {
+      firePlayerWeapons();
+    }
+
+    if (state.comboTimer <= 0) {
+      state.combo = lerp(state.combo, 1, Math.min(1, dt * 3));
+      if (Math.abs(state.combo - 1) < 0.02) state.combo = 1;
+    }
+
     checkWaveComplete();
   }
 
-  function updateKeyboardAim(dt) {
-    const move = (state.dashTime > 0 ? 112 : 72) * dt;
-    const left = state.keys.has("KeyA") || state.keys.has("ArrowLeft");
-    const right = state.keys.has("KeyD") || state.keys.has("ArrowRight");
-    const up = state.keys.has("KeyW") || state.keys.has("ArrowUp");
-    const down = state.keys.has("KeyS") || state.keys.has("ArrowDown");
-
-    if (left) state.targetAim.x -= move;
-    if (right) state.targetAim.x += move;
-    if (up) state.targetAim.y += move;
-    if (down) state.targetAim.y -= move;
-
-    state.targetAim.x = clamp(state.targetAim.x, -aimRangeX(), aimRangeX());
-    state.targetAim.y = clamp(state.targetAim.y, -aimRangeY(), aimRangeY());
+  function handleKeyboardAim(dt) {
+    const speed = state.dashTime > 0 ? 58 : 34;
+    const moveX = (state.keys.has("ArrowRight") || state.keys.has("KeyD") ? 1 : 0) - (state.keys.has("ArrowLeft") || state.keys.has("KeyA") ? 1 : 0);
+    const moveY = (state.keys.has("ArrowUp") || state.keys.has("KeyW") ? 1 : 0) - (state.keys.has("ArrowDown") || state.keys.has("KeyS") ? 1 : 0);
+    if (moveX !== 0 || moveY !== 0) state.pointerActive = false;
+    state.targetAim.x = clamp(state.targetAim.x + moveX * speed * dt, -aimRangeX(), aimRangeX());
+    state.targetAim.y = clamp(state.targetAim.y + moveY * speed * dt, -aimRangeY(), aimRangeY());
   }
 
   function updateAim(dt) {
-    const t = 1 - Math.pow(0.001, dt);
+    const t = Math.min(1, state.pointerActive ? dt * 16 : dt * 5.5);
     state.aim.x = lerp(state.aim.x, state.targetAim.x, t);
     state.aim.y = lerp(state.aim.y, state.targetAim.y, t);
   }
@@ -753,6 +805,8 @@
     cockpit.droneRight.material.opacity = state.drones > 1 ? 0.5 : 0;
     cockpit.droneLeft.material.rotation += dt * 1.3;
     cockpit.droneRight.material.rotation -= dt * 1.3;
+    applyTextureSequence(cockpit.droneLeft, "wingDrone", state.time, 8);
+    applyTextureSequence(cockpit.droneRight, "wingDrone", state.time + 0.25, 8);
   }
 
   function setAimFromPointer(event) {
@@ -854,7 +908,7 @@
     const hp = Math.round(spec.hp * (boss ? 1 + state.waveIndex * 0.04 : waveScale));
     const xLimit = boss ? 4 : aimRangeX() * 1.08;
     const yLimit = boss ? 3 : aimRangeY() * 0.9;
-    const sprite = makeSprite(spec.texture, spec.scale[0], spec.scale[1], { color: spec.tint });
+    const sprite = makeSprite(spec.texture, spec.scale[0], spec.scale[1]);
     const enemy = {
       id: entityId += 1,
       type,
@@ -887,6 +941,7 @@
       const spec = ENEMIES[enemy.type];
       enemy.age += dt;
       enemy.hitFlash = Math.max(0, enemy.hitFlash - dt * 8);
+      applyTextureSequence(enemy.sprite, enemy.type, enemy.age + enemy.phase * 0.05, enemy.boss ? 7 : 4);
 
       if (spec.holdZ && enemy.z < spec.holdZ) {
         enemy.z += spec.speed * dt;
