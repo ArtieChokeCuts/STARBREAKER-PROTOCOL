@@ -269,6 +269,7 @@
     bullets: [],
     enemyShots: [],
     particles: [],
+    effects: [],
     keys: new Set(),
     pointerActive: false,
     pointerDown: false,
@@ -372,6 +373,18 @@
         ctx.lineTo(110, 92);
         ctx.stroke();
       },
+      player: (ctx, size) => {
+        shipSprite(ctx, size, "#71ffce", [[64, 12], [86, 52], [112, 76], [82, 92], [70, 116], [58, 116], [46, 92], [16, 76], [42, 52]], true);
+        ctx.fillStyle = "rgba(113,255,206,0.72)";
+        ctx.beginPath();
+        ctx.moveTo(48, 94);
+        ctx.lineTo(64, 124);
+        ctx.lineTo(80, 94);
+        ctx.fill();
+      },
+      wingDrone: (ctx, size) => {
+        shipSprite(ctx, size, "#e9ddc3", [[64, 20], [90, 50], [82, 90], [64, 108], [46, 90], [38, 50]], true);
+      },
       drone: (ctx, size) => shipSprite(ctx, size, "#77dfff", [
         [64, 14], [94, 64], [64, 114], [34, 64]
       ], true),
@@ -449,6 +462,7 @@
     const image = new Image();
     image.onload = () => {
       const frames = {
+        player: [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0]],
         wingDrone: [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1]],
         drone: [[0, 2], [1, 2]],
         striker: [[2, 2], [3, 2]],
@@ -457,7 +471,9 @@
         warden: [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]],
         leviathan: [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]],
         bullet: [[0, 5]],
-        enemyShot: [[1, 5]]
+        enemyShot: [[1, 5]],
+        explosion: [[5, 5], [6, 5], [7, 5]],
+        smoke: [[7, 5]]
       };
 
       Object.entries(frames).forEach(([name, cells]) => {
@@ -465,6 +481,8 @@
         textures[name] = spriteAnimations[name][0];
       });
 
+      cockpit.player.material.map = textures.player;
+      cockpit.player.material.needsUpdate = true;
       cockpit.droneLeft.material.map = textures.wingDrone;
       cockpit.droneRight.material.map = textures.wingDrone;
       cockpit.droneLeft.material.needsUpdate = true;
@@ -608,13 +626,15 @@
 
   function createCockpit() {
     const reticle = makeSprite("reticle", 10, 10, { depthTest: false, renderOrder: 10 });
-    const muzzle = makeSprite("muzzle", 36, 22, { depthTest: false, renderOrder: 9 });
+    const muzzle = makeSprite("muzzle", 28, 16, { depthTest: false, renderOrder: 8 });
+    const player = makeSprite("player", 38, 38, { depthTest: false, renderOrder: 9, opacity: 0.96 });
     const droneLeft = makeSprite("reticle", 4.2, 4.2, { depthTest: false, opacity: 0 });
     const droneRight = makeSprite("reticle", 4.2, 4.2, { depthTest: false, opacity: 0 });
     muzzle.position.set(0, -25, world.muzzleZ);
+    player.position.set(0, -20, 30);
     droneLeft.position.set(-14, -20, 24);
     droneRight.position.set(14, -20, 24);
-    return { reticle, muzzle, droneLeft, droneRight };
+    return { reticle, muzzle, player, droneLeft, droneRight };
   }
 
   function makeSprite(textureName, width, height, options = {}) {
@@ -739,54 +759,63 @@
 
   function updateIdleCockpit(dt) {
     state.time += dt;
-    state.targetAim.x = Math.sin(state.time * 0.75) * 11;
-    state.targetAim.y = Math.cos(state.time * 1.05) * 5.2;
+    state.targetAim.x = Math.sin(state.time * 0.42) * aimRangeX() * 0.18;
+    state.targetAim.y = Math.cos(state.time * 0.35) * aimRangeY() * 0.14;
     updateAim(dt);
     updateCockpitSprites(dt);
+    updateSpriteEffects(dt);
+    updateParticles(dt);
   }
 
   function updateGame(dt) {
     state.time += dt;
     state.fireTimer -= dt;
     state.spawnTimer -= dt;
-    state.comboTimer -= dt;
-    state.dashCooldown -= dt;
+    state.dashCooldown = Math.max(0, state.dashCooldown - dt);
     state.dashTime = Math.max(0, state.dashTime - dt);
     state.invulnerable = Math.max(0, state.invulnerable - dt);
-    state.shake = Math.max(0, state.shake - dt * 2.5);
+    state.shake = Math.max(0, state.shake - dt * 1.8);
 
-    handleKeyboardAim(dt);
+    updateKeyboardAim(dt);
     updateAim(dt);
-    updateSpawning();
-    updateEnemies(dt);
-    updateBullets(dt);
-    updateEnemyShots(dt);
-    updateParticles(dt);
-    updateCockpitSprites(dt);
+
+    if (state.comboTimer > 0) {
+      state.comboTimer -= dt;
+      if (state.comboTimer <= 0) state.combo = Math.max(1, state.combo - 0.35);
+    }
 
     if ((state.pointerDown || state.keys.has("KeyJ") || state.keys.has("Enter")) && state.fireTimer <= 0) {
       firePlayerWeapons();
     }
 
-    if (state.comboTimer <= 0) {
-      state.combo = lerp(state.combo, 1, Math.min(1, dt * 3));
-      if (Math.abs(state.combo - 1) < 0.02) state.combo = 1;
-    }
-
+    updateSpawning();
+    updateEnemies(dt);
+    updateBullets(dt);
+    updateEnemyShots(dt);
+    updateSpriteEffects(dt);
+    updateParticles(dt);
+    updateCockpitSprites(dt);
     checkWaveComplete();
   }
 
-  function handleKeyboardAim(dt) {
-    const speed = state.dashTime > 0 ? 58 : 34;
-    const moveX = (state.keys.has("ArrowRight") || state.keys.has("KeyD") ? 1 : 0) - (state.keys.has("ArrowLeft") || state.keys.has("KeyA") ? 1 : 0);
-    const moveY = (state.keys.has("ArrowUp") || state.keys.has("KeyW") ? 1 : 0) - (state.keys.has("ArrowDown") || state.keys.has("KeyS") ? 1 : 0);
-    if (moveX !== 0 || moveY !== 0) state.pointerActive = false;
-    state.targetAim.x = clamp(state.targetAim.x + moveX * speed * dt, -aimRangeX(), aimRangeX());
-    state.targetAim.y = clamp(state.targetAim.y + moveY * speed * dt, -aimRangeY(), aimRangeY());
+  function updateKeyboardAim(dt) {
+    const move = (state.dashTime > 0 ? 112 : 72) * dt;
+    const left = state.keys.has("KeyA") || state.keys.has("ArrowLeft");
+    const right = state.keys.has("KeyD") || state.keys.has("ArrowRight");
+    const up = state.keys.has("KeyW") || state.keys.has("ArrowUp");
+    const down = state.keys.has("KeyS") || state.keys.has("ArrowDown");
+
+    if (left) state.targetAim.x -= move;
+    if (right) state.targetAim.x += move;
+    if (up) state.targetAim.y += move;
+    if (down) state.targetAim.y -= move;
+
+    state.targetAim.x = clamp(state.targetAim.x, -aimRangeX(), aimRangeX());
+    state.targetAim.y = clamp(state.targetAim.y, -aimRangeY(), aimRangeY());
   }
 
   function updateAim(dt) {
-    const t = Math.min(1, state.pointerActive ? dt * 16 : dt * 5.5);
+    const t = 1 - Math.pow(0.001, dt);
     state.aim.x = lerp(state.aim.x, state.targetAim.x, t);
     state.aim.y = lerp(state.aim.y, state.targetAim.y, t);
   }
@@ -798,15 +827,22 @@
     cockpit.reticle.material.rotation += dt * (state.pointerDown ? 1.8 : 0.55);
 
     const muzzlePulse = state.pointerDown && state.running ? 1.08 + Math.sin(state.time * 28) * 0.08 : 0.92;
-    cockpit.muzzle.scale.set(36 * muzzlePulse, 22 * muzzlePulse, 1);
+    cockpit.muzzle.scale.set(28 * muzzlePulse, 16 * muzzlePulse, 1);
+
+    const playerPulse = state.pointerDown && state.running ? 1.08 + Math.sin(state.time * 20) * 0.05 : 1;
+    cockpit.player.position.set(state.aim.x * 0.06 + shakeX * 0.35, -16 + state.aim.y * 0.04 + shakeY * 0.25, 30);
+    cockpit.player.scale.set(38 * playerPulse, 38 * playerPulse, 1);
+    cockpit.player.material.opacity = state.invulnerable > 0 ? 0.62 : 0.98;
+    cockpit.player.material.rotation = clamp(-state.aim.x * 0.006, -0.22, 0.22);
+    applyTextureSequence(cockpit.player, "player", state.time, state.pointerDown && state.running ? 10 : 6);
 
     const droneOpacity = state.drones > 0 ? 0.5 : 0;
     cockpit.droneLeft.material.opacity = droneOpacity;
     cockpit.droneRight.material.opacity = state.drones > 1 ? 0.5 : 0;
+    applyTextureSequence(cockpit.droneLeft, "wingDrone", state.time, 8);
+    applyTextureSequence(cockpit.droneRight, "wingDrone", state.time + 0.12, 8);
     cockpit.droneLeft.material.rotation += dt * 1.3;
     cockpit.droneRight.material.rotation -= dt * 1.3;
-    applyTextureSequence(cockpit.droneLeft, "wingDrone", state.time, 8);
-    applyTextureSequence(cockpit.droneRight, "wingDrone", state.time + 0.25, 8);
   }
 
   function setAimFromPointer(event) {
@@ -959,6 +995,9 @@
         enemy.y = enemy.baseY + Math.cos(enemy.age * spec.wobble * 0.72 + enemy.phase) * spec.drift * 0.42;
       }
 
+      const approach = enemy.boss ? 1 : clamp((enemy.z - world.farZ) / (world.nearZ - world.farZ), 0, 1);
+      const spriteScale = enemy.boss ? 1 : 1.35 + approach * 1.15;
+      enemy.sprite.scale.set(spec.scale[0] * spriteScale, spec.scale[1] * spriteScale, 1);
       enemy.sprite.position.set(enemy.x, enemy.y, enemy.z);
       enemy.sprite.material.rotation = Math.sin(enemy.age * 1.7 + enemy.phase) * 0.12;
       enemy.sprite.material.opacity = enemy.hitFlash > 0 ? 0.62 : 1;
@@ -1132,6 +1171,11 @@
   }
 
   function burst(x, y, z, color, count, size) {
+    spawnSpriteEffect("explosion", x, y, z + 2, Math.max(7, 13 * size), Math.max(7, 13 * size), 0.48, 10);
+    if (count > 24) {
+      spawnSpriteEffect("smoke", x + rand(-5, 5), y + rand(-4, 4), z + 1, 16 * size, 12 * size, 0.72, 4);
+    }
+
     for (let i = 0; i < count; i += 1) {
       const sprite = makeSprite("particle", rand(1.2, 3.6) * size, rand(1.2, 3.6) * size, {
         color,
@@ -1153,6 +1197,44 @@
         spin: rand(-4, 4)
       });
     }
+  }
+
+  function spawnSpriteEffect(name, x, y, z, width, height, life, fps) {
+    if (!textures[name]) return;
+    const sprite = makeSprite(name, width, height, {
+      depthTest: false,
+      renderOrder: 6,
+      opacity: 0.95
+    });
+    sprite.position.set(x, y, z);
+    state.effects.push({
+      sprite,
+      name,
+      age: 0,
+      life,
+      maxLife: life,
+      width,
+      height,
+      fps,
+      spin: rand(-0.5, 0.5)
+    });
+  }
+
+  function updateSpriteEffects(dt) {
+    const effects = [...state.effects];
+    effects.forEach((effect) => {
+      effect.age += dt;
+      effect.life -= dt;
+      const progress = clamp(1 - effect.life / effect.maxLife, 0, 1);
+      applyTextureSequence(effect.sprite, effect.name, effect.age, effect.fps);
+      effect.sprite.scale.set(effect.width * (1 + progress * 0.55), effect.height * (1 + progress * 0.55), 1);
+      effect.sprite.material.rotation += effect.spin * dt;
+      effect.sprite.material.opacity = clamp(effect.life / effect.maxLife, 0, 1) * 0.95;
+      if (effect.life <= 0) {
+        removeFromList(state.effects, effect);
+        disposeSprite(effect.sprite);
+      }
+    });
   }
 
   function updateParticles(dt) {
@@ -1376,7 +1458,7 @@
   }
 
   function clearRunObjects() {
-    [state.enemies, state.bullets, state.enemyShots, state.particles].forEach((list) => {
+    [state.enemies, state.bullets, state.enemyShots, state.particles, state.effects].forEach((list) => {
       list.splice(0).forEach((item) => disposeSprite(item.sprite));
     });
   }

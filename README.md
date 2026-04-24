@@ -6,7 +6,7 @@ Starbreaker Protocol is a browser-playable cockpit shooter: a clean glass HUD, s
 
 - A modern fullscreen cockpit layout with less visual clutter
 - Three.js rendering with generated sprite ships, bullets, bosses, particles, and warp rings
-- Cinematic cartoon sprite atlas with cockpit-facing animation frames
+- Cinematic cartoon sprite atlas with cockpit-facing player, enemy, projectile, explosion, and smoke frames
 - Mouse click-hold and touch drag-to-shoot controls
 - Keyboard support for desktop play
 - Six escalating sectors, two boss encounters, upgrade drafts, dash, EMP, combo scoring, and local best score
