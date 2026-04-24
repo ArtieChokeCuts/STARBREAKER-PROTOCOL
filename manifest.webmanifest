@@ -1,13 +1,13 @@
 {
   "name": "Starbreaker Protocol",
   "short_name": "Starbreaker",
-  "description": "A cinematic arcade shooter built for GitHub Pages, mobile install, and fast replay loops.",
+  "description": "A 3D cockpit sprite shooter with hyperwarp visuals, touch controls, and fast replay loops.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#07121c",
-  "theme_color": "#07121c",
+  "background_color": "#020204",
+  "theme_color": "#020204",
   "orientation": "any",
   "icons": [
     {
