@@ -6,185 +6,135 @@
   <title>Starbreaker Protocol</title>
   <meta
     name="description"
-    content="Starbreaker Protocol is a cinematic arcade shooter built to launch straight from a GitHub repository."
+    content="Starbreaker Protocol is a cockpit shooter that sends sprite ships through a 3D hyperwarp tunnel."
   >
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#020204">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 </head>
 <body>
-  <div class="scene-shell">
-    <div class="canvas-wrap">
-      <canvas id="game" width="1280" height="720" aria-label="Starbreaker Protocol game viewport"></canvas>
-      <div class="scanlines" aria-hidden="true"></div>
-      <div class="vignette" aria-hidden="true"></div>
+  <main class="cockpit-shell">
+    <canvas id="game" aria-label="Starbreaker Protocol 3D cockpit game viewport"></canvas>
 
-      <div class="top-panels">
-        <section class="glass-panel info-panel">
-          <p class="eyebrow">Kinetic combat visualizer</p>
-          <h1>STARBREAKER PROTOCOL</h1>
-          <p class="panel-copy">
-            Black-sky neon siege run inspired by your kinetic audio box. Drag with touch or move the mouse,
-            then click and hold to drive the ship and fire straight into the breach.
-          </p>
-          <div class="mini-stats">
-            <article class="mini-stat">
-              <span>Best Score</span>
-              <strong id="bestScoreTitle">0</strong>
-            </article>
-            <article class="mini-stat">
-              <span>Best Echo</span>
-              <strong id="bestScoreSide">0</strong>
-            </article>
-          </div>
-        </section>
-
-        <section class="glass-panel stack-panel">
-          <p class="eyebrow">Upgrade stack</p>
-          <ul class="upgrade-list" id="activeUpgrades">
-            <li>No upgrades online yet</li>
-          </ul>
-        </section>
-      </div>
-
-      <div class="boss-bar hidden" id="bossBarWrap">
-        <div class="boss-bar-label">
-          <span id="bossName">Boss</span>
-          <span id="bossHpText">100%</span>
-        </div>
-        <div class="boss-track"><div id="bossBar"></div></div>
-      </div>
-
-      <div class="overlay intro" id="introOverlay">
-        <div class="overlay-panel hint-card">
-          <p class="eyebrow">Tap to launch</p>
-          <h2>The sky reacts to your hands</h2>
-          <p>
-            Touch and drag to steer-fire on mobile, or move the mouse and click-hold to carve lines through
-            the field on desktop. Dash and EMP stay hot in the lower-right control cluster.
-          </p>
-          <div class="overlay-points">
-            <span>Touch + hold to shoot</span>
-            <span>Mouse + click to shoot</span>
-            <span>Fullscreen inside browser</span>
-          </div>
-          <div class="intro-actions">
-            <button type="button" class="btn launch-btn" id="startButton">Launch Run</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="overlay hidden" id="upgradeOverlay">
-        <div class="overlay-panel upgrade-panel">
-          <p class="eyebrow">Upgrade Bay</p>
-          <h2>Pick your edge</h2>
-          <p id="upgradePrompt">Wave cleared. Reinforce the ship before the next breach opens.</p>
-          <div class="upgrade-grid" id="upgradeGrid"></div>
-        </div>
-      </div>
-
-      <div class="overlay hidden" id="pausedOverlay">
-        <div class="overlay-panel small-panel">
-          <p class="eyebrow">Combat pause</p>
-          <h2>Systems holding</h2>
-          <p>The field is still listening. Jump back in when you are ready.</p>
-          <button type="button" class="btn launch-btn" id="resumeButton">Resume</button>
-        </div>
-      </div>
-
-      <div class="overlay hidden" id="gameOverOverlay">
-        <div class="overlay-panel">
-          <p class="eyebrow" id="gameOverEyebrow">Run complete</p>
-          <h2 id="gameOverTitle">Mission result</h2>
-          <p id="gameOverMessage">Your signal is still echoing through the upper atmosphere.</p>
-          <div class="result-grid">
-            <article>
-              <span>Final Score</span>
-              <strong id="finalScore">0</strong>
-            </article>
-            <article>
-              <span>Best Score</span>
-              <strong id="bestScore">0</strong>
-            </article>
-            <article>
-              <span>Waves Cleared</span>
-              <strong id="wavesCleared">0</strong>
-            </article>
-          </div>
-          <button type="button" class="btn launch-btn" id="replayButton">Fly Again</button>
-        </div>
-      </div>
-
-      <div class="toast hidden" id="toast"></div>
+    <div class="warp-glass" aria-hidden="true"></div>
+    <div class="cockpit-frame" aria-hidden="true">
+      <span class="frame-line top-left"></span>
+      <span class="frame-line top-right"></span>
+      <span class="frame-line bottom-left"></span>
+      <span class="frame-line bottom-right"></span>
+      <span class="visor-arc"></span>
     </div>
 
-    <div class="bottom-bar">
-      <div class="pill meter-pill">
+    <section class="hud hud-top" aria-label="Cockpit telemetry">
+      <div class="brand-lockup">
+        <span>STARBREAKER</span>
+        <strong>PROTOCOL</strong>
+      </div>
+      <div class="mission-strip">
+        <span id="waveValue">STANDBY</span>
+        <strong id="statusValue">HYPERWARP READY</strong>
+      </div>
+      <div class="score-strip">
+        <span>BEST <strong id="bestScoreTitle">0</strong></span>
+        <span>SCORE <strong id="scoreValue">0</strong></span>
+      </div>
+    </section>
+
+    <section class="hud hud-bottom" aria-label="Ship systems">
+      <div class="meter-cluster">
         <article class="meter-card">
-          <span>Hull</span>
-          <strong id="hullValue">100 / 100</strong>
+          <span>HULL</span>
+          <strong id="hullValue">100</strong>
           <div class="meter"><div id="hullBar"></div></div>
         </article>
         <article class="meter-card">
-          <span>EMP Charge</span>
+          <span>EMP</span>
           <strong id="chargeValue">0%</strong>
           <div class="meter charge"><div id="chargeBar"></div></div>
         </article>
-        <article class="meter-card compact-meter">
-          <span>Combo</span>
+        <article class="meter-card">
+          <span>COMBO</span>
           <strong id="comboValue">x1.0</strong>
           <div class="meter combo"><div id="comboBar"></div></div>
         </article>
       </div>
 
-      <div class="pill telemetry-pill">
-        <article class="telemetry-chip">
-          <span>Wave</span>
-          <strong id="waveValue">Standby</strong>
-        </article>
-        <article class="telemetry-chip">
-          <span>Targets</span>
-          <strong id="enemiesValue">0</strong>
-        </article>
-        <article class="telemetry-chip emphasis">
-          <span>Score</span>
-          <strong id="scoreValue">0</strong>
-        </article>
-        <article class="telemetry-chip">
-          <span>Status</span>
-          <strong id="statusValue">Awaiting launch</strong>
-        </article>
-      </div>
-
-      <div class="pill settings-pill">
-        <label class="toggle-label">
-          <input type="checkbox" id="hapticsToggle">
-          <span>Haptics</span>
-        </label>
-        <label>
-          Intensity
-          <input type="range" id="hapticsIntensity" min="0" max="100" value="45">
-        </label>
-      </div>
-
-      <div class="pill settings-pill">
-        <label>
-          Trails
-          <input type="range" id="trail" min="0" max="100" value="78">
-        </label>
-        <label>
-          Drift
-          <input type="range" id="drift" min="0" max="100" value="35">
-        </label>
+      <div class="target-strip">
+        <span>TARGETS</span>
+        <strong id="enemiesValue">0</strong>
       </div>
 
       <div class="action-cluster">
-        <button type="button" class="btn" id="fullscreenButton">Fullscreen</button>
-        <button type="button" class="btn" id="dashButton">Dash</button>
-        <button type="button" class="btn" id="overdriveButton">EMP</button>
+        <button type="button" class="icon-button" id="fullscreenButton" aria-label="Fullscreen" title="Fullscreen">
+          <span>FULL</span>
+        </button>
+        <button type="button" class="icon-button" id="dashButton" aria-label="Dash" title="Dash">
+          <span>DASH</span>
+        </button>
+        <button type="button" class="icon-button emp-button" id="overdriveButton" aria-label="EMP" title="EMP">
+          <span>EMP</span>
+        </button>
+      </div>
+    </section>
+
+    <div class="boss-bar hidden" id="bossBarWrap" aria-label="Boss hull">
+      <div class="boss-bar-label">
+        <span id="bossName">BOSS</span>
+        <span id="bossHpText">100%</span>
+      </div>
+      <div class="boss-track"><div id="bossBar"></div></div>
+    </div>
+
+    <div class="overlay intro" id="introOverlay">
+      <div class="modal launch-modal">
+        <p class="eyebrow">COCKPIT ONLINE</p>
+        <h1>STARBREAKER PROTOCOL</h1>
+        <button type="button" class="primary-button" id="startButton">LAUNCH</button>
       </div>
     </div>
-  </div>
+
+    <div class="overlay hidden" id="upgradeOverlay">
+      <div class="modal upgrade-modal">
+        <p class="eyebrow">UPLINK</p>
+        <h2 id="upgradePrompt">SELECT MOD</h2>
+        <div class="upgrade-grid" id="upgradeGrid"></div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="pausedOverlay">
+      <div class="modal small-modal">
+        <p class="eyebrow">PAUSED</p>
+        <h2>SYSTEMS HOLDING</h2>
+        <button type="button" class="primary-button" id="resumeButton">RESUME</button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="gameOverOverlay">
+      <div class="modal small-modal">
+        <p class="eyebrow" id="gameOverEyebrow">RUN COMPLETE</p>
+        <h2 id="gameOverTitle">MISSION RESULT</h2>
+        <div class="result-grid">
+          <article>
+            <span>SCORE</span>
+            <strong id="finalScore">0</strong>
+          </article>
+          <article>
+            <span>BEST</span>
+            <strong id="bestScore">0</strong>
+          </article>
+          <article>
+            <span>WAVES</span>
+            <strong id="wavesCleared">0</strong>
+          </article>
+        </div>
+        <p class="result-line" id="gameOverMessage">SIGNAL STABLE</p>
+        <button type="button" class="primary-button" id="replayButton">RELAUNCH</button>
+      </div>
+    </div>
+
+    <div class="toast hidden" id="toast"></div>
+  </main>
 
   <script src="game.js"></script>
 </body>
