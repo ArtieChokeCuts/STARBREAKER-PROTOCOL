@@ -1,56 +1,50 @@
 # Starbreaker Protocol
 
-Starbreaker Protocol is a stylish arcade shooter built as a zero-dependency web game. It is designed to be dropped into a GitHub repository and published as a static site, with a black-sky neon shell inspired by the look and feel of Kinetic Audio Box.
+Starbreaker Protocol is a browser-playable cockpit shooter: a clean glass HUD, sprite ships in a Three.js scene, and a hyperwarp star tunnel built for mouse, touch, and keyboard.
 
 ## What is included
 
-- A fullscreen-first glass HUD inspired by Kinetic Audio Box
-- A canvas-based shooter with 6 waves, 2 bosses, and upgrade drafts
-- Keyboard, touch, and mouse click-hold support
-- Browser-based fullscreen support on browsers that allow it
-- Local high-score persistence with `localStorage`
-- No build tooling or package install required
+- A modern fullscreen cockpit layout with less visual clutter
+- Three.js rendering with generated sprite ships, bullets, bosses, particles, and warp rings
+- Mouse click-hold and touch drag-to-shoot controls
+- Keyboard support for desktop play
+- Six escalating sectors, two boss encounters, upgrade drafts, dash, EMP, combo scoring, and local best score
+- Static-site release flow for GitHub Pages
 
-## How to run locally
+## Play locally
 
-Because this project is plain static web content, you can open `index.html` directly in a browser.
+Open `index.html` in a browser, or serve the folder with any static server. The game loads Three.js from a CDN, so the GitHub Pages link is the best way to share it from a phone.
 
-## How to release it on GitHub
+```bash
+python -m http.server 8080
+```
 
-1. Create a new GitHub repository.
-2. Upload the files in this folder to the repository root.
-3. Commit and push.
-4. Enable GitHub Pages for the repository.
-5. Point Pages at the branch and folder that contains these files.
-
-Once Pages finishes deploying, the game will be live as a shareable website.
-
-## Browser fullscreen behavior
-
-- From a normal mobile browser link, the game will load responsively and play with touch controls.
-- On desktop browsers and some Android browsers, the `Fullscreen` button can expand the game area inside the browser window.
-- Some mobile browsers, especially on iPhone and iPad, may still keep browser chrome visible even while playing.
+Then open `http://localhost:8080`.
 
 ## Controls
 
-- `WASD` or arrow keys: move
-- Mouse: move to aim, click and hold to steer-fire
+- Mouse: move aim, click and hold to fire
+- Touch: drag on the playfield to aim and fire
+- `WASD` or arrow keys: aim/evade
+- `J` or `Enter`: fire from keyboard
 - `Shift`: dash
-- `Space`: trigger EMP when fully charged
+- `Space`: EMP when fully charged
 - `P` or `Esc`: pause
-- Touch devices: drag on the playfield to steer-fire, use the on-screen `Dash` and `EMP` buttons
+- `FULL`: request browser fullscreen where the browser allows it
+
+## Release on GitHub
+
+1. Put these files at the repository root.
+2. Commit and push to GitHub.
+3. Enable GitHub Pages for the branch.
+4. Share the Pages URL.
+
+Mobile browsers will play from the link. Some iPhone and Android browser chrome may remain visible unless the browser allows fullscreen or the player installs the page to the home screen.
 
 ## Files
 
-- `index.html`: page shell and UI
-- `styles.css`: visual design and responsive layout
-- `game.js`: gameplay, rendering, audio, and progression
-- `sw.js`: cleanup script that unregisters older cached PWA versions if someone visited an earlier build
+- `index.html`: page shell, cockpit overlays, and HUD
+- `styles.css`: responsive cockpit visuals
+- `game.js`: Three.js sprite engine, gameplay, audio, controls, and progression
+- `sw.js`: cleanup script for older cached versions
 - `icons/`: browser tab and sharing artwork
-
-## Customization ideas
-
-- Change the title and story flavor in `index.html`
-- Tweak balance numbers in `game.js`
-- Replace the color palette in `styles.css`
-- Add your own soundtrack or art assets if you want to push the presentation further
